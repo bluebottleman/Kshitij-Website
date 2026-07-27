@@ -71,15 +71,15 @@ changes needed, the homepage CTA links directly to that filename.
    Netlify automatically wires up form submissions (check Site settings →
    Forms for entries, no backend code needed).
 3. Every time you push a change to GitHub, Netlify redeploys automatically.
-4. Once you have a custom domain (e.g. kshitijpatil.com) pointed at the site
-   via Netlify's domain settings, update the placeholder `og:url` /
-   `og:image` URLs in each page's `<head>` to match the real domain — they
-   currently point at `https://kshitijpatil.com/` as a placeholder.
+4. The site is currently live at `https://kshitijpatil.netlify.app/`, and the
+   `og:url` / `og:image` tags in each page's `<head>` point there. If you
+   later connect a custom domain via Netlify's domain settings, update those
+   same tags in all four pages to match the new domain.
 
 ## What's next
 
-Site content is real and current across all four pages. Remaining
-lower-priority items: the Design page's Instagram grid depends on a
-third-party embed (mirror-app.com) with no fallback if that service ever
-goes down, and the `og:url`/`og:image` domain should be updated once the
-site is live on its real domain (see step 4 above).
+Site content is real and current across all four pages, and it's deployed
+at `https://kshitijpatil.netlify.app/`. Remaining lower-priority items: the
+Design page's Instagram grid depends on a third-party embed (mirror-app.com)
+with no fallback if that service ever goes down, and a custom domain hasn't
+been connected yet (see step 4 above).
