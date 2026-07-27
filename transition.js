@@ -8,6 +8,20 @@
    from its own folder click skips that, since the circle already covers it
    in the right color and playing a second shrink read as the color
    "flashing" twice. */
+/* Safety net for the browser's back-forward cache. Clicking a folder link
+   leaves its transition-circle in the DOM, fully grown, right up until the
+   page unloads for a normal navigation — harmless, since the whole page is
+   about to be replaced. But some browsers snapshot that exact DOM state for
+   instant "Back" restores, circle included, so returning to the page can
+   show it frozen mid-transition (solid color, no content). "pageshow" with
+   persisted:true fires only on that kind of cache restore, so this only
+   ever runs when there's stale animation state to clear. */
+window.addEventListener('pageshow', function (e) {
+  if (e.persisted) {
+    document.querySelectorAll('.transition-circle').forEach(function (el) { el.remove(); });
+  }
+});
+
 (function () {
   var SECTION_RE = /\/(product|marketing|design)\/?(?:index\.html)?$/;
 

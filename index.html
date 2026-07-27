@@ -159,7 +159,7 @@
       </div>
       <p class="share-status" aria-live="polite"></p>
 
-      <form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+      <form class="contact-form" name="contact" method="POST" action="/" data-netlify="true" netlify-honeypot="bot-field">
         <input type="hidden" name="form-name" value="contact">
         <p class="contact-form__honeypot">
           <label>Don&rsquo;t fill this out if you're human: <input name="bot-field"></label>
@@ -178,6 +178,7 @@
         </label>
 
         <button type="submit">Send</button>
+        <p class="contact-form__status" aria-live="polite"></p>
       </form>
 
       <p class="sound-credit">Sound effects from <a href="https://pixabay.com/" target="_blank" rel="noopener noreferrer">Pixabay</a></p>
@@ -213,6 +214,7 @@
   <script src="game.js"></script>
   <script src="sounds.js"></script>
   <script src="share.js"></script>
+  <script src="contact.js"></script>
 
 </body>
 </html>

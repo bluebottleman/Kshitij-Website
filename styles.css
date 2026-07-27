@@ -1136,6 +1136,19 @@ body:not(.page-home) .page {
 .contact-form button:hover,
 .contact-form button:focus-visible { opacity: 0.85; }
 
+/* Inline submit feedback — same fade pattern as .ttt__status/.share-status. */
+.contact-form__status {
+  align-self: center;
+  min-height: 1.5em;
+  font-size: 0.9rem;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.contact-form__status.is-visible { opacity: 1; }
+.contact-form__status.is-error { color: #b3261e; }
+
 /* Netlify still needs the honeypot field in the DOM to catch bots, but a
    sighted visitor should never see or tab into it. */
 .contact-form__honeypot {
