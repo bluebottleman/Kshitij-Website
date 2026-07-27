@@ -1,0 +1,1301 @@
+/* ==========================================================================
+   RESET
+   ========================================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Fustat', sans-serif;
+  color: #000;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Headland One is reserved for titles and nav/button labels, matching the
+   Figma spec exactly (h1/h2 titles, nav links, pill buttons); everything
+   else — including card sub-headings like "The aim" and timeline entry
+   summaries — is body copy and stays on Fustat via the body rule above. */
+h1, h2,
+.pill-nav__current, .pill-nav__link,
+.back-nav__back, .back-nav__link,
+.button-pill, .contact-form button,
+.timeline-entry summary {
+  font-family: 'Headland One', serif;
+}
+
+a { color: inherit; }
+img { max-width: 100%; }
+
+/* ==========================================================================
+   PAGE BACKGROUND COLORS — one class per section, set on <body>. Each
+   sub-page's shared header/timeline/panel styles below are colorless on
+   purpose so they read correctly against any of these. --page-bg drives the
+   bottom-nav gradient backdrop and the page-transition circles so both
+   always match the page they belong to.
+   ========================================================================== */
+/* --badge-bg: the timeline's logo-placeholder plaques (Figma: #439FC4 on
+   the blue Product page) — picked an analogous shade per page
+   rather than reusing blue everywhere. --card-bg: the expanded timeline
+   card's slightly-lighter inset panel (Figma: #BCECFF on Product, ~68% of
+   the page color mixed with white). */
+.page-home     { background: #FFEA81; --page-bg: #FFEA81; }
+.page-product  { background: #9EE3FF; --page-bg: #9EE3FF; --badge-bg: #439FC4; --card-bg: color-mix(in srgb, #9EE3FF 68%, white); }
+.page-marketing{ background: #A4FFB2; --page-bg: #A4FFB2; --badge-bg: #3FAE6B; --card-bg: color-mix(in srgb, #A4FFB2 68%, white); }
+.page-design   { background: #EEBEFF; --page-bg: #EEBEFF; --badge-bg: #A855C4; --card-bg: color-mix(in srgb, #EEBEFF 68%, white); }
+
+/* Graph-paper grid behind the Product page — plain CSS (not the reference
+   raster) so it scales crisply at any size with no extra image request.
+   Line color/spacing (#0591DE, 66px cells) matches the reference exactly;
+   opacity is low so it reads as background texture, not foreground. */
+.page-product {
+  background-image:
+    repeating-linear-gradient(to right, rgba(5, 145, 222, 0.16) 0 1px, transparent 1px 66px),
+    repeating-linear-gradient(to bottom, rgba(5, 145, 222, 0.16) 0 1px, transparent 1px 66px);
+  background-attachment: fixed;
+}
+
+/* ==========================================================================
+   PAGE CONTAINER — every page's content column
+   ========================================================================== */
+.page {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 5.5rem) 1.5rem 9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(3rem, 6vw, 5rem);
+}
+
+/* Sub-pages have no per-element entrance choreography like the homepage's
+   folders/hero do, so once the transition circle has taken over the screen
+   in the page's color, fade the content in on top of it — the "other
+   elements populate the page" half of the folder-opening effect. */
+body:not(.page-home) .page {
+  animation: fadeIn 0.4s ease-out 0.15s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body:not(.page-home) .page { animation: none; }
+}
+
+/* ==========================================================================
+   BOTTOM NAV — shared by the homepage pill nav and the sub-page back-nav.
+   Fixed to the bottom of the viewport, app-tab-bar style, with a gradient
+   backdrop behind it so scrolling content fades out before it reaches the
+   pill instead of running right up against the nav text.
+   ========================================================================== */
+.bottom-nav-backdrop {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 11rem;
+  background: linear-gradient(to top, var(--page-bg) 40%, transparent);
+  pointer-events: none;
+  z-index: 4;
+  transition: opacity 0.3s ease;
+}
+
+.pill-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(1.25rem, 4vw, 3.125rem);
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  padding: 1.1rem 2.25rem;
+  border-radius: 999px;
+  background: var(--page-bg);
+  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.25);
+  font-size: clamp(0.95rem, 1.4vw, 1.3125rem);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Hidden while the page is actively scrolling — nav-scroll.js toggles this
+   1s after scrolling stops, so the pill doesn't compete for attention while
+   reading but is never more than a beat away. */
+.pill-nav.is-nav-hidden,
+.back-nav.is-nav-hidden {
+  transform: translate(-50%, 150%);
+  opacity: 0;
+}
+
+.bottom-nav-backdrop.is-nav-hidden { opacity: 0; }
+
+.pill-nav__current { cursor: default; text-decoration: underline; }
+
+.pill-nav__link { text-decoration: none; }
+.pill-nav__link:hover,
+.pill-nav__link:focus-visible { text-decoration: underline; }
+
+/* ==========================================================================
+   HOMEPAGE — HERO
+   ========================================================================== */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+
+.hero__text {
+  max-width: 37rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hero__text h1 {
+  font-size: clamp(1.75rem, 4vw, 2.625rem);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.hero__text p {
+  font-size: clamp(0.95rem, 1.6vw, 1.125rem);
+  line-height: 1.55;
+}
+
+/* Name in the hero heading — sliding underline draws in on its own 1s after
+   load (see transition.js), independent of hover/tap, which instead control
+   revealing a photo centered on the screen at 75% opacity. Purely
+   decorative: no link, no navigation. */
+.hero__name {
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 2px;
+  transition: background-size 0.6s ease;
+}
+
+.hero__name.is-underlined { background-size: 100% 2px; }
+
+.hero__name-preview {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 50;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero__name:hover .hero__name-preview { opacity: 0.75; }
+}
+
+.hero__name.is-active .hero__name-preview {
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+}
+
+.hero__name.is-fading .hero__name-preview {
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+/* ==========================================================================
+   HOMEPAGE — X's AND O's GAME
+   Replaces the static hero graphic. One cell always starts marked with an
+   X; the player's cursor becomes the O so it's obvious whose turn it is.
+   Markup/behavior lives in game.js.
+   ========================================================================== */
+.ttt-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  animation: fadeIn 0.5s ease-out both;
+}
+
+.ttt {
+  position: relative;
+  width: clamp(230px, 27vw, 300px);
+  aspect-ratio: 1;
+  cursor: url('images/o-cursor.png') 16 16, pointer;
+}
+
+/* Hand-drawn "#" grid from Figma (images/ttt-grid.svg), inset to match the
+   ~20px margin around the artwork in the source frame. */
+.ttt__grid {
+  position: absolute;
+  left: 5.52%;
+  top: 5.52%;
+  width: 88.88%;
+  height: 88.88%;
+  pointer-events: none;
+}
+
+/* Each cell sits at the exact Slot 1-9 bounds from the Figma "X and O"
+   frame (percentages of the 362x362 frame), not a uniform grid — they
+   follow the hand-drawn lines, so they're irregular and slightly
+   overlapping by design. Slot 1 pokes past the left edge in the source
+   file, hence the negative left. */
+.ttt__cell {
+  position: absolute;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: inherit;
+}
+
+.ttt__cell--1 { left: -6.63%; top: 5.80%;  width: 31.49%; height: 25.14%; }
+.ttt__cell--2 { left: 26.80%; top: 0%;     width: 37.02%; height: 26.24%; }
+.ttt__cell--3 { left: 65.75%; top: 0%;     width: 32.60%; height: 26.24%; }
+.ttt__cell--4 { left: 1.66%;  top: 30.94%; width: 31.49%; height: 41.44%; }
+.ttt__cell--5 { left: 33.15%; top: 29.01%; width: 37.02%; height: 37.02%; }
+.ttt__cell--6 { left: 71.27%; top: 26.24%; width: 32.60%; height: 34.25%; }
+.ttt__cell--7 { left: 1.66%;  top: 72.38%; width: 31.49%; height: 29.28%; }
+.ttt__cell--8 { left: 37.29%; top: 66.02%; width: 36.46%; height: 31.49%; }
+.ttt__cell--9 { left: 73.76%; top: 66.02%; width: 30.11%; height: 28.45%; }
+
+.ttt__cell:disabled { cursor: default; }
+
+/* Each cell carries its own hand-drawn X and O (matching that slot's unique
+   wobble) stacked on top of each other, sized to fill the exact slot box —
+   never both visible at once. Empty + unhovered: neither shows. Hovering an
+   open cell fades the O in at low opacity as a "you can play here" nudge;
+   game.js adds is-filled-x/is-filled-o once a move lands there, snapping
+   the right mark to full opacity for good. */
+.ttt__mark {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.ttt__cell:not(:disabled):hover .ttt__mark--o { opacity: 0.4; }
+
+.ttt__cell.is-filled-x .ttt__mark--x,
+.ttt__cell.is-filled-o .ttt__mark--o { opacity: 1; }
+
+.ttt__status {
+  min-height: 1.5em;
+  font-size: 1rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.ttt__status.is-visible { opacity: 1; }
+
+/* ==========================================================================
+   HOMEPAGE — FOLDER LINKS
+   Slide up on load, staggered slightly so they don't land in lockstep
+   (timings lifted from the Figma prototype's keyframes). Hover gives a
+   playful pop so the folders read as clickable/alive before the click.
+   ========================================================================== */
+.folders {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(1rem, 3vw, 1.8rem);
+  width: 100%;
+}
+
+.folder {
+  position: relative;
+  display: block;
+  width: clamp(140px, 18vw, 208px);
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25)) drop-shadow(0 3px 3px rgba(0, 0, 0, 0.15));
+  transition: transform 0.25s cubic-bezier(.34, 1.56, .64, 1);
+  /* fill-mode: backwards (not "both") holds the pre-animation position during
+     the stagger delay, but lets go once the animation ends — "both" was
+     pinning transform: translateY(0) permanently, which silently beat the
+     :hover transition below since CSS animations always win over transitions
+     on the same property. */
+  animation: slideUp 0.5s ease-out backwards;
+}
+
+.folder--marketing { animation-delay: 0s; }
+.folder--product   { animation-delay: 0.04s; }
+.folder--design    { animation-delay: 0.08s; }
+
+.folder:hover,
+.folder:focus-visible { transform: scale(1.08) translateY(-10px); }
+
+/* Page name overlaid on hover/focus so visitors know what they're about to
+   click before they click it. */
+.folder__label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12%;
+  text-align: center;
+  font-family: 'Fustat', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: clamp(0.85rem, 1.8vw, 1.05rem);
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55), 0 0 14px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.folder:hover .folder__label,
+.folder:focus-visible .folder__label {
+  opacity: 1;
+}
+
+.folder img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Pop plays once when the folders are actually near the center of the
+   viewport (.folders.is-in-view, toggled by an IntersectionObserver in
+   sounds.js) — not on a repeating cycle. Since the class is removed the
+   moment the folders leave view and only re-added on a fresh entry,
+   removing/reapplying it is what makes the animation restart — repeating
+   it every few seconds while still in view read as distracting rather than
+   playful. Same reasoning applies to the matching bounce sound. */
+.folders.is-in-view .folder img {
+  /* Runs on the image, not .folder itself, so it never fights the :hover
+     transition above — both would be animating "transform" on the same
+     element otherwise, and a running animation always wins over a
+     transition (see the slideUp/backwards note above). Mostly idle, with a
+     quick attention-getting pop near the end of its one 5s run; staggered
+     per folder below so they don't all pop in lockstep.
+     Longhand on purpose, NOT the "animation" shorthand — the shorthand
+     implicitly resets animation-delay to 0s as part of this declaration,
+     and because this selector (3 classes) is more specific than the
+     per-folder delay rules below (1 class), that reset silently won
+     regardless of source order, flattening every folder's delay to 0 and
+     making them all pop in lockstep. */
+  animation-name: folderPop;
+  animation-duration: 5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+}
+
+.folder--marketing img { animation-delay: 0s; }
+.folder--product   img { animation-delay: 0.15s; }
+.folder--design    img { animation-delay: 0.3s; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(120px); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes folderPop {
+  0%, 88%, 100% { transform: translateY(0) scale(1); }
+  91% { transform: translateY(-14px) scale(1.04); }
+  94% { transform: translateY(0) scale(0.98); }
+  97% { transform: translateY(-4px) scale(1.01); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ttt-wrap,
+  .folder,
+  .folder img,
+  .folders.is-in-view .folder img { animation: none; }
+  .folder:hover, .folder:focus-visible { transform: none; }
+}
+
+/* ==========================================================================
+   HOMEPAGE — "WORKING WITH ME" + PROCESS + RESUME CTA
+   ========================================================================== */
+.working-with-me {
+  width: 100%;
+  max-width: 45rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+}
+
+.working-with-me h2 {
+  font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.working-with-me p {
+  font-size: clamp(0.95rem, 1.6vw, 1.125rem);
+  line-height: 1.55;
+}
+
+.methodology-panel {
+  width: 100%;
+  max-width: 94.5rem;
+  border-radius: 28px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.methodology-panel img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.resume-cta {
+  width: 100%;
+  max-width: 62.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.25rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.resume-cta h2 {
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  font-weight: 400;
+}
+
+.resume-cta p {
+  max-width: 36rem;
+  font-size: clamp(0.9rem, 1.6vw, 1rem);
+  line-height: 1.55;
+}
+
+.button-pill {
+  display: inline-block;
+  font: inherit;
+  font-size: clamp(1rem, 1.4vw, 1.3125rem);
+  padding: 0.75rem 2.25rem;
+  border-radius: 999px;
+  border: none;
+  background: #000;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button-pill:hover,
+.button-pill:focus-visible { opacity: 0.85; }
+
+/* ==========================================================================
+   HOMEPAGE — CONTACT
+   Folded in below the resume CTA instead of a separate page.
+   ========================================================================== */
+.contact {
+  width: 100%;
+  max-width: 45rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  /* Larger rhythm between the three groups (intro text / icons / form);
+     the heading and its paragraph get their own tighter gap below so they
+     read as one block instead of three evenly-spaced lines. */
+  gap: 2rem;
+}
+
+.sound-credit {
+  margin-top: -1rem;
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+.sound-credit a { text-decoration: underline; }
+
+.contact__intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Sizes match .resume-cta directly above — same secondary-heading weight,
+   same body-copy size, matching the rest of the homepage's Headland
+   One / Fustat split. */
+.contact__intro h2 {
+  font-family: 'Headland One', serif;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  font-weight: 400;
+}
+
+.contact__intro p {
+  font-family: 'Fustat', sans-serif;
+  max-width: 36rem;
+  font-size: clamp(0.9rem, 1.6vw, 1rem);
+  line-height: 1.55;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Same solid-black pill treatment as .button-pill so these read as buttons,
+   not text — plus a press-down scale on :active for a real "click" feel. */
+.social-links__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  background: #000;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s cubic-bezier(.34, 1.56, .64, 1), opacity 0.2s ease;
+}
+
+.social-links__icon:hover,
+.social-links__icon:focus-visible {
+  opacity: 0.85;
+  transform: scale(1.1) translateY(-3px);
+}
+
+.social-links__icon:active {
+  transform: scale(0.92);
+}
+
+/* Feedback for the share button's clipboard fallback — same fade pattern
+   as .ttt__status. */
+.share-status {
+  min-height: 1.5em;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.share-status.is-visible { opacity: 1; }
+
+/* Instagram grid — /design/. Sized to match the Figma frame's image-grid
+   panel; the widget iframe (once wired up) fills it edge to edge. */
+.instagram-grid {
+  width: 100%;
+  max-width: 62.6rem;
+}
+
+.instagram-grid__embed {
+  display: block;
+  width: 100%;
+  min-height: 570px;
+  border: none;
+}
+
+/* Frosted placeholder panels — Figma spec is a barely-there
+   rgba(255,255,255,0.1), kept as-is rather than bumped up for "visibility"
+   since it's a deliberate soft/quiet look against each pastel background. */
+.placeholder-panel {
+  width: 100%;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+}
+
+.placeholder-panel--narrow { max-width: 62.6rem; min-height: 300px; }
+.placeholder-panel--wide   { max-width: 94.5rem; min-height: 340px; }
+/* Taller variant for the Design page's single image-grid panel (Figma:
+   570px, vs. 300px for the Product/Marketing intro panel). */
+.placeholder-panel--tall   { min-height: 570px; }
+
+/* ==========================================================================
+   META BANNER — homepage link to the "how this site was built" entry on
+   the Product page. Text-only and fully fluid on purpose (no fixed-aspect
+   artwork to art-direct across breakpoints) — a tri-color gradient across
+   the three section colors stands in as a placeholder "poster" until a
+   custom graphic replaces it; swap in a background-image here whenever
+   that's ready and the layout won't need to change.
+   ========================================================================== */
+.meta-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 94.5rem;
+  min-height: 220px;
+  padding: clamp(2rem, 5vw, 3rem);
+  border-radius: 28px;
+  background: linear-gradient(135deg, #9EE3FF, #A4FFB2 50%, #EEBEFF);
+  color: #000;
+  text-decoration: none;
+  transition: transform 0.25s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+.meta-banner:hover,
+.meta-banner:focus-visible { transform: scale(1.015); }
+
+.meta-banner__kicker {
+  font-family: 'Fustat', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.meta-banner__title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 400;
+  line-height: 1.2;
+  max-width: 40rem;
+}
+
+.meta-banner__cta {
+  font-family: 'Fustat', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-top: 0.4rem;
+}
+
+/* ==========================================================================
+   PROJECT COLLAGE — /product/ and /marketing/ intro banner. Same footprint
+   as the old text-only placeholder panel, but filled with a shuffling grid
+   of every project image on the page (see collage.js); caption sits on top
+   with a scrim behind it for legibility over photos.
+   ========================================================================== */
+/* Single row, as many square tiles as fit the available width — a 2-row
+   grid read as cluttered, and a single flex row sized off height (not a
+   column count) naturally shows more tiles on wide screens and fewer on
+   narrow ones, with no wrapping. Extra tiles beyond what fits just sit
+   past the edge, clipped by overflow:hidden — harmless, since collage.js
+   only cares about the images existing in the DOM, not being visible. */
+.project-collage {
+  position: relative;
+  width: 100%;
+  max-width: 62.6rem;
+  height: 220px;
+  border-radius: 28px;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+}
+
+.project-collage__tile {
+  position: relative;
+  flex: 0 0 auto;
+  width: 220px;
+  height: 100%;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.project-collage__tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.4s ease;
+}
+
+.project-collage__caption {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-family: 'Headland One', serif;
+  font-size: clamp(1.1rem, 2.5vw, 1.375rem);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   PAGE TRANSITIONS — a full-viewport circle in the destination page's
+   color. Clicking a folder grows it from the click point to cover the
+   screen, then navigates; on load, the same circle starts covering the new
+   page and shrinks away in that page's own color so the page "eases in."
+   ========================================================================== */
+.transition-circle {
+  position: fixed;
+  top: 0;
+  left: 0;
+  /* 300vw x 300vh (not 300vmax, i.e. not a perfect circle) on purpose: a
+     true circle shrinking toward an off-center point clears the near edges
+     (top/bottom on a wide viewport) well before the far edges (left/right),
+     leaving a lingering band of the destination page's own color that read
+     as a stall. Scaling proportional to the viewport's own aspect ratio
+     instead means every edge clears at roughly the same time. */
+  width: 300vw;
+  height: 300vh;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.6s cubic-bezier(.65, 0, .35, 1);
+  z-index: 999;
+  pointer-events: none;
+}
+
+.transition-circle.is-active { transform: translate(-50%, -50%) scale(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .transition-circle { display: none; }
+}
+
+/* ==========================================================================
+   SUB-PAGE BACK-NAV — bottom-center like the homepage pill nav. On touch/
+   mobile it's a plain "back" pill; on desktop, hovering (or focusing into)
+   it expands to reveal the full set of section links, same as the
+   homepage's pill nav. Pure CSS, so it stays keyboard accessible via
+   :focus-within.
+   ========================================================================== */
+.back-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  z-index: 5;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.back-nav__pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 0;
+  padding: 1.1rem 2.25rem;
+  border-radius: 999px;
+  background: var(--page-bg);
+  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.25);
+  font-size: clamp(0.95rem, 1.4vw, 1.3125rem);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.back-nav__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+}
+
+.back-nav__links {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(1.25rem, 4vw, 3.125rem);
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-width 0.3s ease, opacity 0.2s ease, margin-left 0.3s ease;
+}
+
+.back-nav__link { text-decoration: none; }
+.back-nav__link:hover,
+.back-nav__link:focus-visible { text-decoration: underline; }
+.back-nav__link--current { cursor: default; }
+
+.back-nav__divider {
+  width: 1px;
+  height: 1.1em;
+  background: currentColor;
+  opacity: 0.4;
+  flex: none;
+}
+
+/* min-width here is the real fix for "still expands on mobile": hover:hover
+   + pointer:fine alone isn't enough to exclude phones — resizing a desktop
+   browser down to test a mobile width keeps reporting a real mouse's
+   hover/pointer capability, and that combined selector below is more
+   specific than the plain .back-nav__links lock in the mobile block above,
+   so it was still winning. Gating on viewport width here means it
+   structurally can't apply below 641px at all, regardless of specificity. */
+@media (hover: hover) and (pointer: fine) and (min-width: 641px) {
+  .back-nav:hover .back-nav__links,
+  .back-nav:focus-within .back-nav__links {
+    max-width: 30rem;
+    opacity: 1;
+    margin-left: clamp(1.25rem, 4vw, 3.125rem);
+  }
+}
+
+/* ==========================================================================
+   SECTION TITLE — "Products" / "Designs" / "Marketing" / "Contact" +
+   description, shared by all 4 sub-pages.
+   ========================================================================== */
+.section-title {
+  width: 100%;
+  max-width: 62.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  text-align: center;
+}
+
+/* Page-header decorative graphics (Marketing's ray burst, Design's
+   squiggle) — full viewport width, edge to edge, pinned to the very top of
+   the page rather than centered behind the title, so they sit as a band
+   above the header instead of risking overlap with it. Direct children of
+   <body> (not .section-title) so "top: 0" means the top of the page, not
+   the top of a flex item. Negative z-index puts them behind <main> — plain
+   z-index:auto here would actually paint *above* main's normal-flow
+   content (positioned elements with z-index:auto still paint after
+   in-flow static content in the stacking order), so the behind-content
+   effect specifically needs the negative value, not just "no z-index." */
+.page-header-graphic {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: clamp(160px, 22vw, 280px);
+  object-fit: cover;
+  object-position: top center;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Comic-style ray burst on Marketing — "POW"-style spotlight, bursts
+   outward + fades in once on load rather than sitting static. */
+.page-header-graphic--burst {
+  transform-origin: top center;
+  animation: burstIn 0.7s cubic-bezier(.34, 1.56, .64, 1) 0.15s both;
+}
+
+@keyframes burstIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1); opacity: 0.75; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-header-graphic--burst { animation: none; opacity: 0.75; }
+}
+
+/* Hand-drawn squiggle on Design — wipes in left-to-right on load via
+   clip-path, like it's being drawn rather than just appearing. */
+.page-header-graphic--squiggle {
+  clip-path: inset(0 100% 0 0);
+  animation: drawIn 1.1s ease-out 0.3s forwards;
+}
+
+@keyframes drawIn {
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-header-graphic--squiggle { animation: none; clip-path: inset(0 0 0 0); }
+}
+
+.section-title h1 {
+  font-size: clamp(1.75rem, 4vw, 2.625rem);
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.section-title p {
+  max-width: 44rem;
+  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+  line-height: 1.55;
+}
+
+/* ==========================================================================
+   TIMELINE — /product/ and /marketing/. Built on <details>/<summary> so the
+   expand/collapse interaction is free: no JS, keyboard and screen-reader
+   accessible by default. The first entry ships open, matching the Figma
+   frame that shows one entry already expanded. The badge plaque doubles as
+   the old connector-line "bullet" and a placeholder for a real company logo
+   later (drop an <img> in .timeline-entry__badge once available).
+   ========================================================================== */
+.timeline {
+  width: 100%;
+  max-width: 62.6rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Subtle demarcation for the "bonus" meta-project (how this site itself
+   got built) — a dashed rule + extra breathing room, enough to read as
+   "this one's different" without competing with the real client work. */
+.timeline-entry--meta {
+  margin-top: 0.75rem;
+  padding-top: 2rem;
+  border-top: 1px dashed currentColor;
+  opacity: 0.75;
+}
+
+.timeline-entry summary {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  cursor: pointer;
+  list-style: none;
+  font-size: clamp(1rem, 2.1vw, 1.3125rem);
+}
+
+.timeline-entry summary::-webkit-details-marker { display: none; }
+
+/* 1:2 height:width plaque instead of a circle — a fixed square/circle crop
+   was cutting the sides off wide logos (FlippAR, Peppercontent, Vanguard
+   are all far from 1:1). object-fit: contain on every logo, not just the
+   wide ones, since this box's own 1:2 ratio would otherwise crop the
+   top/bottom off the near-square logos (OML, Tata NeuCard, Sankey, Treebo)
+   that used to fit the old circle fine. */
+.timeline-entry__badge {
+  flex: none;
+  width: 120px;
+  height: 60px;
+  border-radius: 12px;
+  background: var(--badge-bg, #439FC4);
+  overflow: hidden;
+}
+
+.timeline-entry__badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.timeline-entry__title { flex: 1 1 auto; }
+
+.timeline-entry__year { flex: none; white-space: nowrap; }
+
+.timeline-entry__chevron { flex: none; font-size: 1.5rem; line-height: 1; opacity: 0.6; }
+
+/* The year only appears once a card is open; the chevron hint only shows
+   while it's closed — see the Figma spec's "year replaces chevron on
+   expand" behavior. */
+.timeline-entry:not([open]) .timeline-entry__year { display: none; }
+.timeline-entry[open] .timeline-entry__chevron { display: none; }
+
+.timeline-entry[open] summary { margin-bottom: 1.25rem; }
+
+.timeline-card {
+  background: var(--card-bg, #fff);
+  border-radius: 32px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.25);
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.timeline-card__text {
+  flex: 1 1 20rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.timeline-card__company {
+  font-family: 'Fustat', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 0.15rem;
+}
+
+.timeline-card__role {
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.timeline-card__text h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-top: 1.25rem;
+  margin-bottom: 0.35rem;
+}
+
+/* 2-column grid capped at 4 visible tiles (5th+ hidden via nth-child below)
+   so a project with many photos never grows the card taller than the text
+   column — the rest are still in the DOM for the lightbox to read, just
+   not shown here. A "+N" badge (added by lightbox.js) on the 4th tile
+   signals there's more to see. */
+.timeline-card__images {
+  flex: 0 0 6.25rem;
+  width: 6.25rem;
+  align-self: flex-start;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+.timeline-card__image-slot {
+  background: #fff;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.25);
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-family: 'Headland One', serif;
+  font-size: 0.85rem;
+  text-align: center;
+  opacity: 0.75;
+  position: relative;
+}
+
+.timeline-card__image-slot:nth-child(n+5) { display: none; }
+
+.timeline-card__image-slot:has(img) {
+  cursor: pointer;
+  padding: 0;
+  opacity: 1;
+}
+
+.timeline-card__image-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+}
+
+/* ==========================================================================
+   CONTACT FORM — real Netlify form replacing the "Form will be added
+   here" placeholder. Netlify detects this at deploy time from the
+   data-netlify attribute + hidden form-name field; no backend code needed.
+   ========================================================================== */
+.contact-form {
+  width: 100%;
+  max-width: 62.6rem;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 28px;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.contact-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 1rem;
+}
+
+.contact-form input,
+.contact-form textarea {
+  font: inherit;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: #fff;
+}
+
+.contact-form textarea { min-height: 140px; resize: vertical; }
+
+.contact-form button {
+  align-self: center;
+  font: inherit;
+  font-size: clamp(1rem, 1.4vw, 1.3125rem);
+  padding: 0.75rem 2.25rem;
+  border-radius: 999px;
+  border: none;
+  background: #000;
+  color: #fff;
+  cursor: pointer;
+}
+
+.contact-form button:hover,
+.contact-form button:focus-visible { opacity: 0.85; }
+
+/* Netlify still needs the honeypot field in the DOM to catch bots, but a
+   sighted visitor should never see or tab into it. */
+.contact-form__honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   IMAGE GALLERY LIGHTBOX — /product/ and /marketing/. Clicking any timeline
+   image opens every image for that project in a full-screen carousel;
+   built/controlled by gallery.js. The "+N" badge on a project's 4th visible
+   thumbnail signals there are more images than fit the 2x2 preview grid.
+   ========================================================================== */
+.timeline-card__image-slot__more {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Headland One', serif;
+  font-size: 1.2rem;
+  pointer-events: none;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.lightbox.is-open { display: flex; }
+
+.lightbox__img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.lightbox__close,
+.lightbox__nav {
+  position: absolute;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.lightbox__close:hover,
+.lightbox__nav:hover { background: rgba(255, 255, 255, 0.3); }
+
+.lightbox__close {
+  top: 1rem;
+  right: 1rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.5rem;
+}
+
+.lightbox__nav {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  font-size: 1.75rem;
+}
+
+.lightbox__nav--prev { left: 1rem; }
+.lightbox__nav--next { right: 1rem; }
+
+.lightbox__counter {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* All mobile (max-width: 640px) overrides live in this one block, placed
+   after every base rule they touch. A second copy of this query used to
+   sit near the top of the file, before rules like .timeline-card__images
+   were even defined — same specificity + later source order meant the
+   base rule silently won on mobile regardless of what the "override"
+   said. Keep everything mobile-only here from now on. */
+@media (max-width: 640px) {
+  /* Bigger than the original 60px cap, and more room between them — now
+     that the folder name sits on the icon permanently on mobile (no hover
+     to reveal it), the box needs to actually be big enough to read that
+     text comfortably rather than the smallest size that still "worked". */
+  .folder { width: 100px; }
+  .folders { gap: 1.75rem; }
+  .ttt-wrap { display: none; }
+
+  /* On phone screens the bounce read as barely-there and impossible to
+     time against the sound (both handled together in sounds.js, which
+     skips the whole in-view/hover/click sound+animation setup below this
+     width) — so instead the name just sits permanently visible instead of
+     waiting on a hover that touch devices don't really have. */
+  .folder__label { opacity: 1; }
+  .folders.is-in-view .folder img { animation: none; }
+
+  .page-home .pill-nav,
+  .page-home .bottom-nav-backdrop { display: none; }
+  .page-home .page { padding-bottom: 3rem; }
+
+  .hero__text { text-align: center; }
+
+  .back-nav__links { max-width: 0; opacity: 0; }
+
+  /* Badge on its own line, title+year sharing the line below it — the
+     badge alone was eating most of the row width, squeezing the title
+     down to almost nothing. Grid (not flex-wrap) so title and year land
+     on the same second line as a pair, rather than each wrapping
+     independently. Year and chevron share a grid-area since only one is
+     ever visible at a time (see the [open]/:not([open]) rules above). */
+  .timeline-entry summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    grid-template-areas:
+      "badge badge badge"
+      "title title year";
+    align-items: center;
+    column-gap: 0.85rem;
+    row-gap: 0.35rem;
+    font-size: 1rem;
+  }
+  .timeline-entry__badge { grid-area: badge; width: 88px; height: 44px; border-radius: 10px; }
+  /* Same size as the card's own body copy (.timeline-card__text below) —
+     at the shared 1rem summary size the title read oversized next to how
+     little room the bigger badge leaves it on narrow screens. */
+  .timeline-entry__title { grid-area: title; font-size: 0.875rem; }
+  .timeline-entry__year,
+  .timeline-entry__chevron { grid-area: year; justify-self: end; }
+  .timeline-card { padding: 1rem; gap: 1rem; }
+  .timeline-card__text { font-size: 0.875rem; }
+  .timeline-card__company { font-size: 1rem; }
+  .timeline-card__images { flex: 1 1 16rem; width: auto; grid-template-columns: repeat(2, 1fr); }
+  .timeline-card__image-slot { font-size: 0.75rem; }
+
+  .lightbox { padding: 1rem; }
+  .lightbox__nav { width: 2.5rem; height: 2.5rem; font-size: 1.4rem; }
+  .lightbox__close { width: 2.25rem; height: 2.25rem; font-size: 1.25rem; }
+
+  .project-collage { height: 140px; }
+  .project-collage__tile { width: 140px; }
+}

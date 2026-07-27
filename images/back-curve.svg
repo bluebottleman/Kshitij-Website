@@ -1,0 +1,10 @@
+<svg width="1068" height="120" viewBox="0 0 1068 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+<!-- Shared decorative underline for sub-page headers. Hand-rebuilt from the
+     Figma export's path data with the baked-in page-background rect
+     stripped out, so this one file can overlay any page color (each
+     sub-page in Figma had this exact shape, just tinted to its own
+     background -- a flat translucent fill reads as the same soft "shelf
+     edge" against every pastel background without needing one export per
+     page color). -->
+<path d="M4 116.706C4 118.525 5.47489 120 7.29425 120H1060.26C1062.96 120 1064.74 117.223 1063.33 114.925C1055.48 102.141 1042.96 91.7472 1027.57 85.2335C1010.06 77.8283 987.152 77.8283 941.327 77.8283H498.915C474.482 77.8283 443.23 75.9411 412.546 56.5967C381.863 37.2524 408.001 53.7659 375.612 33.0061C343.224 12.2463 326.708 8 298.335 8H134.917C89.0915 8 66.179 8 48.6761 15.4051C33.2801 21.9189 20.7628 32.3125 12.9182 45.0965C4 59.6299 4 78.6552 4 116.706Z" fill="black" fill-opacity="0.06"/>
+</svg>
