@@ -982,6 +982,11 @@ body:not(.page-home) .page {
   border-radius: 12px;
   background: var(--badge-bg, #439FC4);
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  line-height: 1;
 }
 
 .timeline-entry__badge img {
@@ -1292,7 +1297,7 @@ body:not(.page-home) .page {
     row-gap: 0.35rem;
     font-size: 1rem;
   }
-  .timeline-entry__badge { grid-area: badge; width: 88px; height: 44px; border-radius: 10px; }
+  .timeline-entry__badge { grid-area: badge; width: 88px; height: 44px; border-radius: 10px; font-size: 1.35rem; }
   /* Same size as the card's own body copy (.timeline-card__text below) —
      at the shared 1rem summary size the title read oversized next to how
      little room the bigger badge leaves it on narrow screens. */
