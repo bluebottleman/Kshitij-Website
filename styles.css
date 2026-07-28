@@ -989,6 +989,20 @@ body:not(.page-home) .page {
   line-height: 1;
 }
 
+/* White backdrop for emoji badges whose glyph colors read poorly straight
+   against --badge-bg (e.g. the Design page's purple) — used selectively,
+   not on emoji that are already mostly white themselves (adding a white
+   backdrop behind a mostly-white glyph erases its own outline). */
+.timeline-entry__badge-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: #fff;
+  border-radius: 10px;
+}
+
 .timeline-entry__badge img {
   width: 100%;
   height: 100%;
@@ -1298,6 +1312,7 @@ body:not(.page-home) .page {
     font-size: 1rem;
   }
   .timeline-entry__badge { grid-area: badge; width: 88px; height: 44px; border-radius: 10px; font-size: 1.35rem; }
+  .timeline-entry__badge-emoji { width: 34px; height: 34px; border-radius: 8px; }
   /* Same size as the card's own body copy (.timeline-card__text below) —
      at the shared 1rem summary size the title read oversized next to how
      little room the bigger badge leaves it on narrow screens. */
