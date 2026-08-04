@@ -1284,7 +1284,11 @@ body:not(.page-home) .page {
   padding: clamp(1.5rem, 4vw, 2.5rem);
   display: flex;
   gap: clamp(1.5rem, 4vw, 3rem);
-  align-items: flex-start;
+  /* The chips pane's height depends on how many FAQ chips there are, so
+     it won't always exactly match the chat pane's fixed height below —
+     flex-end keeps the chat pane's bottom edge flush with the section's
+     bottom instead of pinned to the top with a gap underneath it. */
+  align-items: flex-end;
 }
 
 .ask-section__chips-pane {
@@ -1329,8 +1333,15 @@ body:not(.page-home) .page {
   color: #ffd500;
 }
 
+/* Fixed height on purpose — was previously sized by its own content, so
+   it stayed short and pinned to the top of the section while the chips
+   pane ran much taller, then awkwardly grew taller every time a new
+   message was added. Now it's always full-length regardless of how much
+   (or how little) conversation is in it, and the log scrolls internally
+   instead of the whole pane resizing. */
 .ask-section__chat-pane {
   flex: 1 1 40%;
+  height: 460px;
   background: #fff8d4;
   border-radius: 16px;
   padding: 1.25rem;
@@ -1343,8 +1354,8 @@ body:not(.page-home) .page {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  min-height: 100px;
-  max-height: 320px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -1483,4 +1494,16 @@ body:not(.page-home) .page {
   .ask-section { flex-direction: column; }
   .ask-section__chips-pane,
   .ask-section__chat-pane { width: 100%; }
+  .ask-section__chips-pane { gap: 1rem; }
+  /* Same 12 chips at desktop sizing took a lot of scrolling to get past on
+     a phone screen — smaller and tighter so the whole set reads as one
+     compact block instead of a long list. */
+  .ask-section__chips { gap: 0.4rem; }
+  .ask-section__chip { font-size: 0.68rem; padding: 0.4rem 0.75rem; }
+  .ask-section__heading { font-size: 1.5rem; }
+  /* flex: none resets the base rule's "flex: 1 1 40%" — with flex-basis
+     set to a percentage, it silently overrides the "height" property on
+     the main axis (vertical here, since the section is column-direction
+     on mobile), which is why height alone had no visible effect. */
+  .ask-section__chat-pane { flex: none; height: 380px; }
 }
