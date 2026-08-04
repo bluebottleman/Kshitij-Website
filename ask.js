@@ -1,13 +1,23 @@
-/* "Ask Kshitij" — a small on-site search, not a real AI. It matches a
-   visitor's question against window.SITE_QA_INDEX (ask-data.js) by keyword
-   overlap and returns a short answer + a link to the matching case study.
-   No network calls, no API key, nothing that can go off-script — if
-   nothing scores well enough, it says so plainly and points to the contact
-   form instead of guessing. Builds its own DOM so the same widget works on
-   every page from one script include, no markup duplication needed. */
+/* "Ask about my work" section — a small on-site search, not a real AI. It
+   matches a visitor's question (typed, or one of the curated FAQ chips)
+   against window.SITE_QA_INDEX (ask-data.js) by whole-word keyword overlap
+   and returns a short answer, an optional link to the matching case study,
+   and a "Send me a mail" link that scrolls down to the real contact form
+   below — every response gets that link, matched or not, so there's always
+   one direct next step instead of a dead end. No network calls, no API
+   key, nothing that can go off-script. Enhances the static markup in
+   index.html rather than building its own DOM, since this now lives inline
+   on the homepage instead of floating on every page. */
 (function () {
   var index = window.SITE_QA_INDEX || [];
-  if (!index.length) return;
+  var log = document.getElementById('ask-log');
+  var form = document.getElementById('ask-form');
+  var input = document.getElementById('ask-input');
+  var chips = document.querySelectorAll('.ask-section__chip');
+  if (!index.length || !log || !form) return;
+
+  var byId = {};
+  index.forEach(function (entry) { byId[entry.id] = entry; });
 
   var STOPWORDS = ['a', 'an', 'the', 'is', 'are', 'was', 'were', 'do', 'does', 'did',
     'what', 'who', 'how', 'why', 'when', 'where', 'tell', 'me', 'about', 'your', 'you',
@@ -19,7 +29,7 @@
   }
 
   /* Whole-word matching only — substring matching (tok inside a longer
-     string) was scoring "like" as a hit inside "dreamlike," "art" inside
+     string) scored "like" as a hit inside "dreamlike," "art" inside
      "start," etc., producing confident-looking answers to unrelated
      questions. Tokenizing both sides and checking exact membership avoids
      that whole class of false positive. */
@@ -48,77 +58,78 @@
     return bestScore >= 3 ? best : null;
   }
 
-  var linkPrefix = /\/(product|marketing|design)\/?(?:index\.html)?$/.test(location.pathname) ? '../' : '';
-
-  var wrap = document.createElement('div');
-  wrap.className = 'ask-widget';
-  wrap.innerHTML =
-    '<button type="button" class="ask-widget__toggle" aria-expanded="false" aria-label="Ask about my work">' +
-      '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 17.5v.01M9.5 9.3a2.5 2.5 0 1 1 3.4 2.33c-.9.36-1.4 1.1-1.4 1.87v.5"/><circle cx="12" cy="12" r="9.5"/></svg>' +
-    '</button>' +
-    '<div class="ask-widget__panel" hidden>' +
-      '<p class="ask-widget__heading">Ask about my work</p>' +
-      '<p class="ask-widget__subheading">A quick search over this site, not a live AI. It only knows what is on these pages.</p>' +
-      '<div class="ask-widget__log" aria-live="polite"></div>' +
-      '<form class="ask-widget__form">' +
-        '<input type="text" class="ask-widget__input" placeholder="e.g. What did you do at Treebo?" aria-label="Ask a question">' +
-        '<button type="submit" class="ask-widget__send">Ask</button>' +
-      '</form>' +
-    '</div>';
-  document.body.appendChild(wrap);
-
-  var toggle = wrap.querySelector('.ask-widget__toggle');
-  var panel = wrap.querySelector('.ask-widget__panel');
-  var log = wrap.querySelector('.ask-widget__log');
-  var form = wrap.querySelector('.ask-widget__form');
-  var input = wrap.querySelector('.ask-widget__input');
-
-  toggle.addEventListener('click', function () {
-    var open = panel.hasAttribute('hidden');
-    if (open) {
-      panel.removeAttribute('hidden');
-      toggle.setAttribute('aria-expanded', 'true');
-      input.focus();
-    } else {
-      panel.setAttribute('hidden', '');
-      toggle.setAttribute('aria-expanded', 'false');
+  var emptyState = log.querySelector('.ask-section__empty');
+  function clearEmptyState() {
+    if (emptyState) {
+      emptyState.remove();
+      emptyState = null;
     }
-  });
+  }
 
-  function addBubble(text, cls) {
+  function addUserBubble(text) {
     var bubble = document.createElement('p');
-    bubble.className = 'ask-widget__bubble ' + cls;
+    bubble.className = 'ask-bubble ask-bubble--user';
     bubble.textContent = text;
     log.appendChild(bubble);
-    log.scrollTop = log.scrollHeight;
   }
 
-  function addAnswerBubble(entry) {
+  function addBotBubble(entry) {
     var bubble = document.createElement('div');
-    bubble.className = 'ask-widget__bubble ask-widget__bubble--bot';
+    bubble.className = 'ask-bubble ask-bubble--bot';
+
     var p = document.createElement('p');
-    p.textContent = entry.answer;
+    p.textContent = entry ? entry.answer
+      : "I don't have anything on that here — but here's a direct line if you'd rather ask in person.";
     bubble.appendChild(p);
-    var a = document.createElement('a');
-    a.href = (linkPrefix + entry.page.replace(/^\//, '')) || '#';
-    a.textContent = 'See ' + entry.title + ' →';
-    bubble.appendChild(a);
+
+    /* Homepage-only entries (page === "/") have nowhere new to send someone
+       — they're already here — so only real subpage/case-study links get
+       shown. */
+    if (entry && entry.page && entry.page !== '/') {
+      var a = document.createElement('a');
+      a.href = entry.page;
+      a.textContent = 'See ' + entry.title + ' →';
+      bubble.appendChild(a);
+    }
+
+    var mail = document.createElement('a');
+    mail.href = '#contact';
+    mail.className = 'ask-bubble__mail';
+    mail.textContent = 'Send me a mail →';
+    mail.addEventListener('click', function (e) {
+      e.preventDefault();
+      var contact = document.getElementById('contact');
+      if (!contact) return;
+      contact.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(function () {
+        var messageField = document.getElementById('contact-message');
+        if (messageField) messageField.focus();
+      }, 500);
+    });
+    bubble.appendChild(mail);
+
     log.appendChild(bubble);
     log.scrollTop = log.scrollHeight;
   }
+
+  function ask(questionText, entry) {
+    clearEmptyState();
+    addUserBubble(questionText);
+    addBotBubble(entry);
+  }
+
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var entry = byId[chip.dataset.qaId];
+      ask(chip.textContent, entry);
+    });
+  });
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var q = input.value.trim();
     if (!q) return;
-    addBubble(q, 'ask-widget__bubble--user');
+    ask(q, bestMatch(q));
     input.value = '';
-
-    var match = bestMatch(q);
-    if (match) {
-      addAnswerBubble(match);
-    } else {
-      addBubble("I don't have anything on that here — feel free to reach out through the contact form on the homepage if you'd like to ask directly.", 'ask-widget__bubble--bot');
-    }
   });
 })();

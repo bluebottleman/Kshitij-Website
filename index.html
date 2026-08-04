@@ -134,6 +134,43 @@
       <a class="button-pill" href="resume.pdf" download="KshitijPatil_PMM.pdf">Download Resume</a>
     </section>
 
+    <!-- ASK ABOUT MY WORK — a small on-site search (ask.js + ask-data.js),
+         not a live AI. Chips are curated FAQ shortcuts pointing at an exact
+         ask-data.js entry via data-qa-id, so they always show the intended
+         answer regardless of the free-text matcher's scoring; the input
+         below falls back to that matcher for anything not on the list.
+         Every answer — chip-triggered or typed — ends with a "Send me a
+         mail" link that scrolls to and focuses the contact form below,
+         so there's always one direct next step instead of a dead end. -->
+    <section class="ask-section reveal">
+      <div class="ask-section__chips-pane">
+        <div class="ask-section__chips">
+          <button type="button" class="ask-section__chip" data-qa-id="background">What's your professional background?</button>
+          <button type="button" class="ask-section__chip" data-qa-id="why-pmm">Why are you focused on product marketing?</button>
+          <button type="button" class="ask-section__chip" data-qa-id="different">What makes you different from other candidates?</button>
+          <button type="button" class="ask-section__chip" data-qa-id="treebo">What did you do at Treebo?</button>
+          <button type="button" class="ask-section__chip" data-qa-id="team">Have you managed a team before?</button>
+          <button type="button" class="ask-section__chip" data-qa-id="gtm">Do you have go-to-market or campaign experience?</button>
+          <button type="button" class="ask-section__chip" data-qa-id="tools">What tools and platforms do you use?</button>
+          <button type="button" class="ask-section__chip" data-qa-id="process">What's your working process like?</button>
+          <button type="button" class="ask-section__chip" data-qa-id="start-date">When are you graduating and available to start?</button>
+          <button type="button" class="ask-section__chip" data-qa-id="relocation">Are you open to relocating?</button>
+          <button type="button" class="ask-section__chip" data-qa-id="visa">Do you require visa sponsorship?</button>
+          <button type="button" class="ask-section__chip" data-qa-id="resume">Where can I see your resume?</button>
+        </div>
+        <h2 class="ask-section__heading">How can I help you?</h2>
+      </div>
+      <div class="ask-section__chat-pane">
+        <div class="ask-section__log" id="ask-log" aria-live="polite">
+          <p class="ask-section__empty">Tap a question, or ask your own below.</p>
+        </div>
+        <form class="ask-section__form" id="ask-form">
+          <input type="text" class="ask-section__input" id="ask-input" placeholder="e.g. When will you be graduating?" aria-label="Ask a question">
+          <button type="submit" class="ask-section__send">Ask</button>
+        </form>
+      </div>
+    </section>
+
     <!-- CONTACT — folded into the homepage; there wasn't enough distinct
          content to justify its own page. Netlify reads this form at deploy
          time from the data-netlify attribute + hidden form-name field; no
