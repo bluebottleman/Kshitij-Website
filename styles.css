@@ -1390,12 +1390,23 @@ body:not(.page-home) .page {
 
 .ask-bubble--bot p { margin: 0 0 0.4rem; }
 .ask-bubble--bot a { display: block; color: inherit; text-decoration: underline; }
-.ask-bubble__mail { font-weight: 700; }
 
 .ask-section__form {
   display: flex;
   gap: 0.5rem;
 }
+
+/* Persistent, single instance — used to repeat on every bot reply, which
+   read as noisy once a conversation had more than one or two exchanges. */
+.ask-section__mail-link {
+  align-self: center;
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
+  text-decoration: underline;
+}
+
+.ask-section__mail-link:hover,
+.ask-section__mail-link:focus-visible { color: #000; }
 
 .ask-section__input {
   flex: 1;

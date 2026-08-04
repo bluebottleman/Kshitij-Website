@@ -1,19 +1,21 @@
 /* "Ask about my work" section — a small on-site search, not a real AI. It
    matches a visitor's question (typed, or one of the curated FAQ chips)
    against window.SITE_QA_INDEX (ask-data.js) by whole-word keyword overlap
-   and returns a short answer, an optional link to the matching case study,
-   and a "Send me a mail" link that scrolls down to the real contact form
-   below — every response gets that link, matched or not, so there's always
-   one direct next step instead of a dead end. No network calls, no API
-   key, nothing that can go off-script. Enhances the static markup in
-   index.html rather than building its own DOM, since this now lives inline
-   on the homepage instead of floating on every page. */
+   and returns a short, first-person answer plus an optional link to the
+   matching case study. The "prefer email?" link lives once, permanently,
+   near the input — it used to repeat on every single reply, which read as
+   noisy in a growing conversation, so now it's one persistent affordance
+   instead of a stamp on every message. No network calls, no API key,
+   nothing that can go off-script. Enhances the static markup in index.html
+   rather than building its own DOM, since this lives inline on the
+   homepage instead of floating on every page. */
 (function () {
   var index = window.SITE_QA_INDEX || [];
   var log = document.getElementById('ask-log');
   var form = document.getElementById('ask-form');
   var input = document.getElementById('ask-input');
   var chips = document.querySelectorAll('.ask-section__chip');
+  var mailLink = document.getElementById('ask-mail-link');
   if (!index.length || !log || !form) return;
 
   var byId = {};
@@ -32,7 +34,11 @@
      string) scored "like" as a hit inside "dreamlike," "art" inside
      "start," etc., producing confident-looking answers to unrelated
      questions. Tokenizing both sides and checking exact membership avoids
-     that whole class of false positive. */
+     that whole class of false positive. Keyword hits are worth more than
+     title/answer hits since they're a deliberately curated signal, not a
+     coincidental word overlap — widening the keyword lists in ask-data.js
+     is the safe way to catch more real questions, rather than lowering
+     this threshold and risking more confident-but-wrong matches. */
   function bestMatch(query) {
     var qTokens = tokenize(query);
     if (!qTokens.length) return null;
@@ -79,7 +85,7 @@
 
     var p = document.createElement('p');
     p.textContent = entry ? entry.answer
-      : "I don't have anything on that here — but here's a direct line if you'd rather ask in person.";
+      : "That one's outside what I've got written up here — try asking it a different way, or just email me directly (there's a link right below).";
     bubble.appendChild(p);
 
     /* Homepage-only entries (page === "/") have nowhere new to send someone
@@ -91,22 +97,6 @@
       a.textContent = 'See ' + entry.title + ' →';
       bubble.appendChild(a);
     }
-
-    var mail = document.createElement('a');
-    mail.href = '#contact';
-    mail.className = 'ask-bubble__mail';
-    mail.textContent = 'Send me a mail →';
-    mail.addEventListener('click', function (e) {
-      e.preventDefault();
-      var contact = document.getElementById('contact');
-      if (!contact) return;
-      contact.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setTimeout(function () {
-        var messageField = document.getElementById('contact-message');
-        if (messageField) messageField.focus();
-      }, 500);
-    });
-    bubble.appendChild(mail);
 
     log.appendChild(bubble);
     log.scrollTop = log.scrollHeight;
@@ -132,4 +122,17 @@
     ask(q, bestMatch(q));
     input.value = '';
   });
+
+  if (mailLink) {
+    mailLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      var contact = document.getElementById('contact');
+      if (!contact) return;
+      contact.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(function () {
+        var messageField = document.getElementById('contact-message');
+        if (messageField) messageField.focus();
+      }, 500);
+    });
+  }
 })();
