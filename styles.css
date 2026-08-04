@@ -373,35 +373,28 @@ body:not(.page-home) .page {
   height: auto;
 }
 
-/* Pop plays once when the folders are actually near the center of the
-   viewport (.folders.is-in-view, toggled by an IntersectionObserver in
-   sounds.js) — not on a repeating cycle. Since the class is removed the
-   moment the folders leave view and only re-added on a fresh entry,
-   removing/reapplying it is what makes the animation restart — repeating
-   it every few seconds while still in view read as distracting rather than
-   playful. Same reasoning applies to the matching bounce sound. */
-.folders.is-in-view .folder img {
-  /* Runs on the image, not .folder itself, so it never fights the :hover
-     transition above — both would be animating "transform" on the same
-     element otherwise, and a running animation always wins over a
-     transition (see the slideUp/backwards note above). Mostly idle, with a
-     quick attention-getting pop near the end of its one 5s run; staggered
-     per folder below so they don't all pop in lockstep.
-     Longhand on purpose, NOT the "animation" shorthand — the shorthand
-     implicitly resets animation-delay to 0s as part of this declaration,
-     and because this selector (3 classes) is more specific than the
-     per-folder delay rules below (1 class), that reset silently won
-     regardless of source order, flattening every folder's delay to 0 and
-     making them all pop in lockstep. */
-  animation-name: folderPop;
-  animation-duration: 5s;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: 1;
+/* Continuous idle "jelly" squash-stretch — runs at all times (desktop and
+   mobile alike), on the image rather than .folder itself so it never fights
+   the :hover scale transition above (both would be animating "transform" on
+   the same element otherwise). Pauses on hover/focus so the deliberate
+   hover-pop reads clearly instead of fighting the idle wobble. Values tuned
+   via an interactive preview: fast (0.6s) and subtle (low intensity) so it
+   reads as "alive," not distracting. */
+.folder img {
+  animation: folderJelly 0.6s cubic-bezier(.36, .11, .29, 1.09) infinite;
 }
 
-.folder--marketing img { animation-delay: 0s; }
-.folder--product   img { animation-delay: 0.15s; }
-.folder--design    img { animation-delay: 0.3s; }
+.folder:hover img,
+.folder:focus-visible img {
+  animation-play-state: paused;
+}
+
+@keyframes folderJelly {
+  0%, 100% { transform: scale(1, 1); }
+  30% { transform: scale(1.04, 0.96); }
+  55% { transform: scale(0.976, 1.024); }
+  75% { transform: scale(1.008, 0.992); }
+}
 
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -413,18 +406,35 @@ body:not(.page-home) .page {
   to   { transform: translateY(0); }
 }
 
-@keyframes folderPop {
-  0%, 88%, 100% { transform: translateY(0) scale(1); }
-  91% { transform: translateY(-14px) scale(1.04); }
-  94% { transform: translateY(0) scale(0.98); }
-  97% { transform: translateY(-4px) scale(1.01); }
+/* ==========================================================================
+   SCROLL-REVEAL — sections/cards marked .reveal start lower and transparent,
+   then float up into place the first time they cross into view (reveal.js
+   handles the IntersectionObserver). Distance/easing tuned via an
+   interactive preview — 80px read as a satisfying "just landed" float
+   without feeling slow. Each element only ever plays once per page load. */
+.reveal {
+  opacity: 0;
+  transform: translateY(80px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(.34, 1.1, .4, 1);
+}
+
+.reveal.reveal--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ttt-wrap,
   .folder,
-  .folder img,
-  .folders.is-in-view .folder img { animation: none; }
+  .folder img { animation: none; }
   .folder:hover, .folder:focus-visible { transform: none; }
 }
 
@@ -1270,13 +1280,11 @@ body:not(.page-home) .page {
   .folders { gap: 1.75rem; }
   .ttt-wrap { display: none; }
 
-  /* On phone screens the bounce read as barely-there and impossible to
-     time against the sound (both handled together in sounds.js, which
-     skips the whole in-view/hover/click sound+animation setup below this
-     width) — so instead the name just sits permanently visible instead of
-     waiting on a hover that touch devices don't really have. */
+  /* The name just sits permanently visible on phone screens instead of
+     waiting on a hover that touch devices don't really have. The idle
+     jelly animation on .folder img runs the same as desktop — no
+     mobile-specific override needed for it. */
   .folder__label { opacity: 1; }
-  .folders.is-in-view .folder img { animation: none; }
 
   .page-home .pill-nav,
   .page-home .bottom-nav-backdrop { display: none; }

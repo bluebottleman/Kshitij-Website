@@ -37,7 +37,7 @@
     <!-- Shuffling collage of every project image below on this page — pool
          and swap logic live in collage.js, sourced straight from the
          timeline galleries so it can't drift out of sync. -->
-    <div class="project-collage">
+    <div class="project-collage reveal">
       <div class="project-collage__tile"><img alt=""></div>
       <div class="project-collage__tile"><img alt=""></div>
       <div class="project-collage__tile"><img alt=""></div>
@@ -55,7 +55,7 @@
          only when expanded; chevron hints "expandable" while collapsed
          (see .timeline-entry rules). -->
     <ol class="timeline">
-      <li>
+      <li class="reveal">
         <details class="timeline-entry" open>
           <summary>
             <span class="timeline-entry__badge" aria-hidden="true"><img src="../images/logos/vanguard-id-systems.png" alt=""></span>
@@ -91,7 +91,7 @@
           </div>
         </details>
       </li>
-      <li>
+      <li class="reveal">
         <details class="timeline-entry">
           <summary>
             <span class="timeline-entry__badge" aria-hidden="true"><img src="../images/logos/tata-neucard.png" alt=""></span>
@@ -126,7 +126,7 @@
           </div>
         </details>
       </li>
-      <li>
+      <li class="reveal">
         <details class="timeline-entry">
           <summary>
             <span class="timeline-entry__badge" aria-hidden="true"><img src="../images/logos/billbolo.png" alt=""></span>
@@ -163,7 +163,7 @@
           </div>
         </details>
       </li>
-      <li>
+      <li class="reveal">
         <details class="timeline-entry">
           <summary>
             <span class="timeline-entry__badge" aria-hidden="true"><img src="../images/logos/flippar.png" alt=""></span>
@@ -202,7 +202,7 @@
           </div>
         </details>
       </li>
-      <li>
+      <li class="reveal">
         <details class="timeline-entry">
           <summary>
             <span class="timeline-entry__badge" aria-hidden="true"><img src="../images/logos/sankey-business-solutions.png" alt=""></span>
@@ -292,6 +292,7 @@
   </div>
 
   <script src="../transition.js"></script>
+  <script src="../reveal.js"></script>
   <script src="../gallery.js"></script>
   <script src="../collage.js"></script>
 
