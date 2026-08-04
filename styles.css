@@ -1265,6 +1265,130 @@ body:not(.page-home) .page {
   opacity: 0.8;
 }
 
+/* ==========================================================================
+   "ASK KSHITIJ" WIDGET — a small on-site search (ask.js + ask-data.js), not
+   a live AI. Built by ask.js on every page from one script include, so the
+   markup here just styles whatever it creates. Fixed bottom-right so it
+   never competes with the bottom-center pill/back nav; a solid white panel
+   (not tied to --page-bg) since it needs to read the same regardless of
+   which of the 4 page colors it's floating over.
+   ========================================================================== */
+.ask-widget {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 40;
+}
+
+.ask-widget__toggle {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: none;
+  background: #000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s cubic-bezier(.34, 1.56, .64, 1), opacity 0.2s ease;
+}
+
+.ask-widget__toggle:hover,
+.ask-widget__toggle:focus-visible {
+  opacity: 0.85;
+  transform: scale(1.08);
+}
+
+.ask-widget__panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.75rem);
+  width: min(320px, calc(100vw - 3rem));
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ask-widget__heading {
+  font-family: 'Headland One', serif;
+  font-size: 1.05rem;
+}
+
+.ask-widget__subheading {
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.55);
+  line-height: 1.4;
+}
+
+.ask-widget__log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.ask-widget__bubble {
+  font-size: 0.85rem;
+  line-height: 1.45;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  max-width: 90%;
+}
+
+.ask-widget__bubble--user {
+  align-self: flex-end;
+  background: #000;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.ask-widget__bubble--bot {
+  align-self: flex-start;
+  background: rgba(0, 0, 0, 0.06);
+  border-bottom-left-radius: 4px;
+}
+
+.ask-widget__bubble--bot p { margin: 0 0 0.35rem; }
+.ask-widget__bubble--bot a { color: inherit; font-weight: 700; text-decoration: underline; }
+
+.ask-widget__form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ask-widget__input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.ask-widget__input:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
+
+.ask-widget__send {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: none;
+  background: #000;
+  color: #fff;
+  cursor: pointer;
+}
+
+.ask-widget__send:hover,
+.ask-widget__send:focus-visible { opacity: 0.85; }
+
 /* All mobile (max-width: 640px) overrides live in this one block, placed
    after every base rule they touch. A second copy of this query used to
    sit near the top of the file, before rules like .timeline-card__images
